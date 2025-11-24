@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+    <TextView
+        android:id="@+id/text_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="default"
+        android:textSize="30dp"/>
+
+    <Switch
+        android:id="@+id/switch_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="特别关注"
+        android:layout_marginTop="16dp"
+        android:padding="12dp"/>
+
+    <TextView
+        android:id="@+id/text_remarks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="设置备注"
+        android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"/>
+    <TextView
+        android:id="@+id/text_delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="取消关注"
+        android:textColor="#FF0000"
+        android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"/>
+</LinearLayout>
