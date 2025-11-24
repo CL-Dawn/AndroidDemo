@@ -1,0 +1,6 @@
+这是一个关于安卓端的手机应用项目
+其采用了ViewPage2实现界面间的水平滑动
+主要实现的fragment为followFragment，也就是关注界面
+TabLayout用于实现上方的标签导航栏
+关注界面的用户列表则由RecycleView实现
+followFragment里绑定了UserAdapter
