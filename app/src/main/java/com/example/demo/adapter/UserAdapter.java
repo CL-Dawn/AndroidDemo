@@ -2,6 +2,7 @@ package com.example.demo.adapter;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +16,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.demo.ImageLoader;
 import com.example.demo.R;
 import com.example.demo.listelement.User;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     private List<User> userList;
     private OnItemClickListener onItemClickListener;
+    private SparseArray<Integer> avatarPreloadStatus = new SparseArray<>();
+    private WeakReference<Context> contextRef;
 
     public interface OnItemClickListener {
         void onFollowClick(int position, User user);
@@ -38,7 +43,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
-
     public void updateData(List<User> newUserList) {
         this.userList = newUserList;
         notifyDataSetChanged();
@@ -63,8 +67,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 onItemClickListener.onFollowClick(position, user);
             }
         });
-
-
         holder.ivAvatar.setOnClickListener(v -> {
             Toast.makeText(v.getContext(),
                     "已选中 " + user.getName() ,
@@ -81,7 +83,28 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public int getItemCount() {
         return userList != null ? userList.size() : 0;
     }
+    @Override
+    public void onViewRecycled(@NonNull UserViewHolder holder) {
+        super.onViewRecycled(holder);
+        // 视图被回收时清理资源
+        if (holder.ivAvatar != null) {
+            holder.ivAvatar.setImageDrawable(null);
+        }
+    }
+    public void preloadAvatars(int start, int end) {
+        if (contextRef == null || contextRef.get() == null) return;
+        Context context = contextRef.get();
+        for (int i = Math.max(0, start - 2); i <= Math.min(userList.size() - 1, end + 2); i++) {
+            User user = userList.get(i);
+            int avatarResId = user.getAvatarResId();
 
+            // 避免重复预加载
+            if (avatarPreloadStatus.get(avatarResId, 0) == 0) {
+                ImageLoader.preloadAvatar(context, avatarResId);
+                avatarPreloadStatus.put(avatarResId, 1);
+            }
+        }
+    }
     // 创建并显示设置对话框
     private void showSettingDialog(Context context, User user,int position) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
@@ -157,11 +180,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String remark = input.getText().toString().trim();
-                // 这里可以添加更新备注的逻辑
                 user.setRemark(remark);
                 Toast.makeText(context, "备注已更新", Toast.LENGTH_SHORT).show();
-
-                // 刷新当前项显示
                 notifyItemChanged(position);
             }
         });
@@ -193,6 +213,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         public void bind(User user) {
             tvUserName.setText(user.getRemarkOrName());
             ivAvatar.setImageResource(user.getAvatarResId());
+            ImageLoader.loadAvatar(itemView.getContext(), user.getAvatarResId(), ivAvatar);
             if (user.isSpecial()) {
                 tvSpecialIndicator.setVisibility(View.VISIBLE);
             } else {

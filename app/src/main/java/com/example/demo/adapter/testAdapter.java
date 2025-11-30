@@ -16,6 +16,7 @@ public class testAdapter extends FragmentStateAdapter {
     // 页面数量（对应“互关/关注/粉丝/朋友”4个页面）
     private static final int PAGE_COUNT = 4;
     private static final String TAG = "TestAdapter";
+    private Fragment[] fragments = new Fragment[PAGE_COUNT];
     public testAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
 
@@ -23,6 +24,9 @@ public class testAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
+        if (fragments[position] != null) {
+            return fragments[position];
+        }
         Fragment fragment;
         switch (position) {
             case 0:

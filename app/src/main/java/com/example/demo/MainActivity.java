@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
         adapter = new testAdapter(this);
         viewPager2.setAdapter(adapter);
         viewPager2.setCurrentItem(0, false);
+        //界面预加载
+        viewPager2.setOffscreenPageLimit(2);
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
