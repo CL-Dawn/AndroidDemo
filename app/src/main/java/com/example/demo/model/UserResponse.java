@@ -1,6 +1,4 @@
 package com.example.demo.model;
-
-import com.example.demo.listelement.User;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;

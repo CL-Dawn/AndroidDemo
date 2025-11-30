@@ -1,7 +1,6 @@
 package com.example.demo.model;
 
 import com.google.gson.annotations.SerializedName;
-
 public class ServerUser {
     @SerializedName("id")
     private int id;

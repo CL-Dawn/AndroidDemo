@@ -74,7 +74,6 @@ public class FollowFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view);
         myfollows = view.findViewById(R.id.myfollows);
 
-        // 初始化 OkHttpClient 并添加日志拦截器
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
@@ -176,7 +175,6 @@ public class FollowFragment extends Fragment {
                         // 拖动时，优先保证流畅度
                         break;
                     case RecyclerView.SCROLL_STATE_SETTLING:
-                        // 惯性滚动时，保持当前策略
                         break;
                 }
             }
@@ -197,7 +195,6 @@ public class FollowFragment extends Fragment {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "网络请求失败: " + e.getMessage());
                 new Handler(Looper.getMainLooper()).post(() -> {
                     isLoading = false;
                     if (swipeRefreshLayout.isRefreshing()) {
@@ -211,13 +208,11 @@ public class FollowFragment extends Fragment {
                     throw new IOException("Unexpected code " + response);
                 }
                 final String responseData = response.body().string();
-                Log.d(TAG, "收到响应，数据长度: " + responseData.length());
                 new Handler(Looper.getMainLooper()).post(() -> {
                     try {
                         JSONObject jsonResponse = new JSONObject(responseData);
 
                         if (!jsonResponse.getBoolean("success")) {
-                            Log.e(TAG, "API返回失败: " + jsonResponse.getString("message"));
                             return;
                         }
                         JSONObject data = jsonResponse.getJSONObject("data");
@@ -233,7 +228,6 @@ public class FollowFragment extends Fragment {
 
                         if (newUsers.isEmpty()) {
                             hasMore = false;
-                            Log.d(TAG, "没有更多数据了");
                         } else {
                             int startPosition = userList.size();
                             userList.addAll(newUsers);
@@ -247,7 +241,6 @@ public class FollowFragment extends Fragment {
                             }
 
                             currentPage++;
-                            Log.d(TAG, "成功加载 " + newUsers.size() + " 个用户，当前总计: " + userList.size());
                         }
 
                     } catch (JSONException e) {
@@ -268,12 +261,10 @@ public class FollowFragment extends Fragment {
 
         JSONArray usersArray = data.getJSONArray("users");
 
-        // 检查是否还有更多数据
         int currentPage = data.getInt("current_page");
         int totalPages = data.getInt("total_pages");
         hasMore = currentPage < totalPages;
 
-        // 预定义的本地头像资源
         int[] avatarResIds = {
                 R.drawable.avator_1, R.drawable.avator_2, R.drawable.avator_3,
                 R.drawable.avator_4, R.drawable.avator_5, R.drawable.avator_6,
@@ -293,7 +284,7 @@ public class FollowFragment extends Fragment {
             boolean isSpecial = userJson.getBoolean("is_special");
             String remark = userJson.isNull("remark") ? null : userJson.getString("remark");
 
-            // 创建用户对象 - 使用本地头像资源
+            // 创建用户对象
             int avatarIndex = (this.currentPage * PAGE_SIZE + i) % avatarResIds.length;
             User user = new User(id, name, isFollowed, avatarResIds[avatarIndex]);
 
@@ -319,21 +310,16 @@ public class FollowFragment extends Fragment {
         refreshMyFollow();
         sortUserList();
         userAdapter.notifyItemChanged(position);
-
-        Log.d(TAG, "更新关注状态: " + user.getName() + " - " + (follow ? "已关注" : "取消关注"));
     }
 
     private void updateSpecialStatus(User user, boolean isSpecial, int position) {
         user.setSpecial(isSpecial);
         sortUserList();
         userAdapter.notifyDataSetChanged();
-
-        Log.d(TAG, "更新特别关注状态: " + user.getName() + " - " + (isSpecial ? "设为特别关注" : "取消特别关注"));
     }
 
     private void refreshData() {
         Log.d(TAG, "开始下拉刷新");
-
         // 移除标记为待删除的用户
         List<User> usersToRemove = new ArrayList<>();
         for (User user : userList) {
@@ -343,7 +329,6 @@ public class FollowFragment extends Fragment {
         }
         userList.removeAll(usersToRemove);
 
-        // 重置分页状态
         currentPage = 1;
         hasMore = true;
         userList.clear();
@@ -351,7 +336,6 @@ public class FollowFragment extends Fragment {
         if (getContext() != null) {
             ImageLoader.clearMemoryCache(getContext());
         }
-        // 重新加载数据（关注数会在第一页加载时从服务器重新获取）
         loadMoreData();
     }
     private void sortUserList() {
